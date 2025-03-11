@@ -1,5 +1,4 @@
 
-import React, { useState } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,7 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-// Define select options
+
 const OPTIONS = [
   { value: "option1", label: "Option 1" },
   { value: "option2", label: "Option 2" },
@@ -31,7 +30,7 @@ const OPTIONS = [
   { value: "option4", label: "Option 4" },
 ];
 
-// Define form schema with Zod
+
 const formSchema = z.object({
   fields: z.array(
     z.object({
@@ -43,8 +42,8 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const DynamicForm = () => {
-  // Initialize form with React Hook Form
+const Form = () => {
+
   const {
     control,
     handleSubmit,
@@ -58,35 +57,32 @@ const DynamicForm = () => {
     },
   });
 
-  // Use fieldArray to handle dynamic fields
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: "fields",
   });
 
-  // Watch form values for display
+ 
   const formValues = watch();
 
-  // Handle form submission
+
   const onSubmit = async (data: FormValues) => {
     try {
-      // Simulate API call with timeout
+     
       await new Promise((resolve) => setTimeout(resolve, 500));
       
-      // Show success toast
       toast.success("Form submitted successfully");
       
-      // You would typically send data to an API here
-      console.log("Form data:", data);
       
-      // Optionally reset form after successful submission
-      // reset();
+      console.log("Form data:", data);
+  
     } catch (error) {
       toast.error("Failed to submit form");
     }
   };
 
-  // Add new field pair
+  
   const addNewField = () => {
     append({ input: "", select: "" });
   };
@@ -108,7 +104,7 @@ const DynamicForm = () => {
                       <div>
                         <Input
                           {...field}
-                          placeholder="Enter text"
+                          placeholder="Enter value"
                           className={`w-full ${
                             errors.fields?.[index]?.input ? "border-red-500" : ""
                           }`}
@@ -193,7 +189,7 @@ const DynamicForm = () => {
         </form>
       </div>
 
-      {/* Form State Display */}
+     
       <div className="mt-8">
         <h3 className="text-xl font-semibold mb-4 text-gray-800">Form State</h3>
         <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
@@ -225,4 +221,4 @@ const DynamicForm = () => {
   );
 };
 
-export default DynamicForm;
+export default Form;

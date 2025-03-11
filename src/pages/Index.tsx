@@ -1,6 +1,4 @@
-
-import React from "react";
-import DynamicForm from "@/components/DynamicForm";
+import Form from "@/components/Form";
 
 const Index = () => {
   return (
@@ -11,7 +9,7 @@ const Index = () => {
           A dynamic form with validation and state management
         </p>
       </header>
-      <DynamicForm />
+      <Form />
     </div>
   );
 };
