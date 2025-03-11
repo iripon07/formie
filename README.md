@@ -1,18 +1,13 @@
-# Welcome to your Lovable project
+# Welcome to Formie 
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/10a36db6-88ec-4183-a209-e7cba8281d6f
+**URL**: https://formie-beta.vercel.app/
 
-## How can I edit this code?
 
-There are several ways of editing your application.
+Website Link: [Formie](https://formie-beta.vercel.app/)
 
-**Use Lovable**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/10a36db6-88ec-4183-a209-e7cba8281d6f) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
 
 **Use your preferred IDE**
 
@@ -24,7 +19,7 @@ Follow these steps:
 
 ```sh
 # Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+git clone <https://github.com/iripon07/formie>
 
 # Step 2: Navigate to the project directory.
 cd <YOUR_PROJECT_NAME>
