@@ -1,114 +1,226 @@
-import React, { useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { v4 as uuidv4 } from "uuid";
-import FieldPair from "./FieldPair";
-import FormStateDisplay from "./FormStateDisplay";
-import { FieldPair as FieldPairType, FormState } from "@/types/form";
-import { useToast } from "@/components/ui/use-toast";
 
+import React, { useState } from "react";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Plus, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+// Define select options
+const OPTIONS = [
+  { value: "option1", label: "Option 1" },
+  { value: "option2", label: "Option 2" },
+  { value: "option3", label: "Option 3" },
+  { value: "option4", label: "Option 4" },
+];
+
+// Define form schema with Zod
 const formSchema = z.object({
-  fieldPairs: z
-    .array(
-      z.object({
-        id: z.string(),
-        inputValue: z.string().min(1, "Input is required"),
-        selectValue: z.string().min(1, "Selection is required"),
-      })
-    )
-    .min(1, "At least one field pair is required"),
+  fields: z.array(
+    z.object({
+      input: z.string().min(1, { message: "Input is required" }),
+      select: z.string().min(1, { message: "Selection is required" }),
+    })
+  ).min(1),
 });
 
-const DynamicForm: React.FC = () => {
-  const [submittedData, setSubmittedData] = useState<FieldPairType[]>([]);
-  const { toast } = useToast();
+type FormValues = z.infer<typeof formSchema>;
 
-  const methods = useForm<FormState>({
+const DynamicForm = () => {
+  // Initialize form with React Hook Form
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+    watch,
+  } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fieldPairs: [{ id: uuidv4(), inputValue: "", selectValue: "" }],
+      fields: [{ input: "", select: "" }],
     },
   });
 
-  const {
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors },
-  } = methods;
-  const fieldPairs = watch("fieldPairs");
+  // Use fieldArray to handle dynamic fields
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "fields",
+  });
 
-  const addFieldPair = () => {
-    setValue("fieldPairs", [
-      ...fieldPairs,
-      { id: uuidv4(), inputValue: "", selectValue: "" },
-    ]);
-  };
+  // Watch form values for display
+  const formValues = watch();
 
-  const removeFieldPair = (index: number) => {
-    if (fieldPairs.length === 1) {
-      toast({
-        title: "Cannot remove",
-        description: "At least one field pair is required",
-        variant: "destructive",
-      });
-      return;
+  // Handle form submission
+  const onSubmit = async (data: FormValues) => {
+    try {
+      // Simulate API call with timeout
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      
+      // Show success toast
+      toast.success("Form submitted successfully");
+      
+      // You would typically send data to an API here
+      console.log("Form data:", data);
+      
+      // Optionally reset form after successful submission
+      // reset();
+    } catch (error) {
+      toast.error("Failed to submit form");
     }
-
-    const newFieldPairs = [...fieldPairs];
-    newFieldPairs.splice(index, 1);
-    setValue("fieldPairs", newFieldPairs);
   };
 
-  const onSubmit = (data: FormState) => {
-    setSubmittedData(data.fieldPairs);
-    toast({
-      title: "Form submitted",
-      description: `Successfully submitted ${data.fieldPairs.length} field pairs`,
-    });
+  // Add new field pair
+  const addNewField = () => {
+    append({ input: "", select: "" });
   };
 
   return (
-    <div className="form-container">
-      <h2 className="text-2xl font-bold mb-6">Dynamic Form</h2>
+    <div className="w-full max-w-3xl mx-auto p-6">
+      <div className="bg-white rounded-lg shadow-sm border p-6">
+        <h2 className="text-2xl font-semibold mb-6 text-gray-800">Dynamic Form</h2>
+        
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="space-y-4">
+            {fields.map((field, index) => (
+              <div key={field.id} className="flex items-start space-x-3">
+                <div className="flex-grow space-y-1">
+                  <Controller
+                    control={control}
+                    name={`fields.${index}.input`}
+                    render={({ field }) => (
+                      <div>
+                        <Input
+                          {...field}
+                          placeholder="Enter text"
+                          className={`w-full ${
+                            errors.fields?.[index]?.input ? "border-red-500" : ""
+                          }`}
+                        />
+                        {errors.fields?.[index]?.input && (
+                          <p className="text-red-500 text-sm mt-1">
+                            {errors.fields[index]?.input?.message}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  />
+                </div>
 
-      <FormProvider {...methods}>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {fieldPairs.map((field, index) => (
-            <FieldPair
-              key={field.id}
-              index={index}
-              onDelete={() => removeFieldPair(index)}
-            />
-          ))}
+                <div className="flex-grow space-y-1">
+                  <Controller
+                    control={control}
+                    name={`fields.${index}.select`}
+                    render={({ field }) => (
+                      <div>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <SelectTrigger
+                            className={`w-full ${
+                              errors.fields?.[index]?.select ? "border-red-500" : ""
+                            }`}
+                          >
+                            <SelectValue placeholder="Select an option" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {OPTIONS.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {errors.fields?.[index]?.select && (
+                          <p className="text-red-500 text-sm mt-1">
+                            {errors.fields[index]?.select?.message}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  />
+                </div>
 
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Button type="button" onClick={addFieldPair} className="add-button">
-              <Plus size={18} /> Add Field Pair
-            </Button>
+                <div className="flex items-center space-x-2 pt-2">
+                  {fields.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => remove(index)}
+                      className="flex-shrink-0 h-10 w-10 border-red-200 hover:bg-red-50 hover:text-red-600"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
 
             <Button
-              type="submit"
-              className="bg-primary/90 hover:bg-primary text-primary-foreground shadow-sm"
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addNewField}
+              className="mt-2 flex items-center gap-1"
             >
-              Submit Form
+              <Plus className="h-4 w-4" /> Add Field
             </Button>
           </div>
 
-          {errors.fieldPairs &&
-            typeof errors.fieldPairs === "object" &&
-            "message" in errors.fieldPairs && (
-              <p className="text-destructive">
-                {errors.fieldPairs.message?.toString()}
-              </p>
-            )}
+          <div className="mt-6">
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Submitting..." : "Submit Form"}
+            </Button>
+          </div>
         </form>
-      </FormProvider>
+      </div>
 
-      <FormStateDisplay fieldPairs={submittedData} />
+      {/* Form State Display */}
+      <div className="mt-8">
+        <h3 className="text-xl font-semibold mb-4 text-gray-800">Form State</h3>
+        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[50px]">#</TableHead>
+                <TableHead>Input Value</TableHead>
+                <TableHead>Select Value</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {formValues.fields.map((field, index) => (
+                <TableRow key={index}>
+                  <TableCell className="font-medium">{index + 1}</TableCell>
+                  <TableCell>{field.input || "—"}</TableCell>
+                  <TableCell>
+                    {field.select
+                      ? OPTIONS.find((o) => o.value === field.select)?.label || field.select
+                      : "—"}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
     </div>
   );
 };
