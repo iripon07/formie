@@ -1,4 +1,3 @@
-
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,7 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
+import { formSchema } from "@/schema/formValidation";
 
 const OPTIONS = [
   { value: "option1", label: "Option 1" },
@@ -30,20 +29,9 @@ const OPTIONS = [
   { value: "option4", label: "Option 4" },
 ];
 
-
-const formSchema = z.object({
-  fields: z.array(
-    z.object({
-      input: z.string().min(1, { message: "Input is required" }),
-      select: z.string().min(1, { message: "Selection is required" }),
-    })
-  ).min(1),
-});
-
 type FormValues = z.infer<typeof formSchema>;
 
 const Form = () => {
-
   const {
     control,
     handleSubmit,
@@ -57,32 +45,25 @@ const Form = () => {
     },
   });
 
-
   const { fields, append, remove } = useFieldArray({
     control,
     name: "fields",
   });
 
- 
   const formValues = watch();
-
 
   const onSubmit = async (data: FormValues) => {
     try {
-     
       await new Promise((resolve) => setTimeout(resolve, 500));
-      
+
       toast.success("Form submitted successfully");
-      
-      
+
       console.log("Form data:", data);
-  
     } catch (error) {
       toast.error("Failed to submit form");
     }
   };
 
-  
   const addNewField = () => {
     append({ input: "", select: "" });
   };
@@ -90,8 +71,10 @@ const Form = () => {
   return (
     <div className="w-full max-w-3xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-sm border p-6">
-        <h2 className="text-2xl font-semibold mb-6 text-gray-800">Dynamic Form</h2>
-        
+        <h2 className="text-2xl font-semibold mb-6 text-gray-800">
+          Dynamic Form
+        </h2>
+
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">
             {fields.map((field, index) => (
@@ -106,7 +89,9 @@ const Form = () => {
                           {...field}
                           placeholder="Enter value"
                           className={`w-full ${
-                            errors.fields?.[index]?.input ? "border-red-500" : ""
+                            errors.fields?.[index]?.input
+                              ? "border-red-500"
+                              : ""
                           }`}
                         />
                         {errors.fields?.[index]?.input && (
@@ -131,14 +116,19 @@ const Form = () => {
                         >
                           <SelectTrigger
                             className={`w-full ${
-                              errors.fields?.[index]?.select ? "border-red-500" : ""
+                              errors.fields?.[index]?.select
+                                ? "border-red-500"
+                                : ""
                             }`}
                           >
                             <SelectValue placeholder="Select an option" />
                           </SelectTrigger>
                           <SelectContent>
                             {OPTIONS.map((option) => (
-                              <SelectItem key={option.value} value={option.value}>
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
                                 {option.label}
                               </SelectItem>
                             ))}
@@ -189,7 +179,6 @@ const Form = () => {
         </form>
       </div>
 
-     
       <div className="mt-8">
         <h3 className="text-xl font-semibold mb-4 text-gray-800">Form State</h3>
         <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
@@ -208,7 +197,8 @@ const Form = () => {
                   <TableCell>{field.input || "—"}</TableCell>
                   <TableCell>
                     {field.select
-                      ? OPTIONS.find((o) => o.value === field.select)?.label || field.select
+                      ? OPTIONS.find((o) => o.value === field.select)?.label ||
+                        field.select
                       : "—"}
                   </TableCell>
                 </TableRow>
